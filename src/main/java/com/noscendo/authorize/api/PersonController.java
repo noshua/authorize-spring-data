@@ -17,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RequestMapping("/person")
 @RequiredArgsConstructor
@@ -77,7 +79,8 @@ public class PersonController {
     public ResponseEntity<List<PersonResponse>> search(@RequestBody PersonSearch search) {
         Specification<Person> spec = Specification.where((root, query, cb) -> cb.equal(root.get("name"), search.getName()));
 
-        List<Sort.Order> orders = search.getOrders().stream()
+        List<Sort.Order> orders = Stream.ofNullable(search.getOrders())
+                .flatMap(Collection::stream)
                 .map(orderBy -> new Sort.Order(orderBy.getDirection(), orderBy.getProperty()))
                 .toList();
 
